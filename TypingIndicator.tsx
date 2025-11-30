@@ -1,53 +1,79 @@
 import React from 'react';
-import { Bot, Brain, Dumbbell, Trophy } from 'lucide-react';
 import { AppMode } from './types';
+import { Brain, Dumbbell, Trophy, Sparkles } from 'lucide-react';
 
 interface TypingIndicatorProps {
   mode: AppMode;
 }
 
 const TypingIndicator: React.FC<TypingIndicatorProps> = ({ mode }) => {
-  const getThemeStyles = () => {
+  const getThemeConfig = () => {
     switch (mode) {
       case 'learning':
         return {
-          bg: 'bg-sky-600',
-          dot: 'bg-sky-400',
-          icon: <Brain size={18} />
+          gradient: 'bg-gradient-to-br from-sky-500 to-cyan-400',
+          icon: <Brain size={18} />,
         };
       case 'practice':
         return {
-          bg: 'bg-orange-500',
-          dot: 'bg-orange-400',
-          icon: <Dumbbell size={18} />
+          gradient: 'bg-gradient-to-br from-orange-500 to-amber-400',
+          icon: <Dumbbell size={18} />,
         };
       case 'test':
         return {
-          bg: 'bg-rose-600',
-          dot: 'bg-rose-400',
-          icon: <Trophy size={18} />
+          gradient: 'bg-gradient-to-br from-rose-500 to-pink-400',
+          icon: <Trophy size={18} />,
         };
       default:
         return {
-          bg: 'bg-indigo-600',
-          dot: 'bg-indigo-400',
-          icon: <Bot size={18} />
+          gradient: 'bg-gradient-to-br from-indigo-500 to-purple-500',
+          icon: <Sparkles size={18} />,
         };
     }
   };
 
-  const theme = getThemeStyles();
+  const theme = getThemeConfig();
 
   return (
-    <div className="flex w-full mb-6 justify-start">
-      <div className="flex flex-row items-end gap-2">
-        <div className={`flex-shrink-0 w-8 h-8 rounded-full text-white flex items-center justify-center animate-pulse transition-colors duration-300 ${theme.bg}`}>
-            {theme.icon}
+    <div className="flex w-full mb-5 justify-start animate-fade-in">
+      <div className="flex max-w-[88%] md:max-w-[75%] flex-row items-end gap-3">
+        
+        {/* Avatar */}
+        <div 
+          className={`
+            avatar flex-shrink-0 
+            ${theme.gradient}
+            shadow-lg
+            animate-pulse-soft
+          `}
+        >
+          {theme.icon}
         </div>
-        <div className="bg-white p-4 rounded-2xl rounded-bl-none border border-slate-100 shadow-sm flex gap-1 items-center h-12">
-          <span className={`w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s] ${theme.dot}`}></span>
-          <span className={`w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s] ${theme.dot}`}></span>
-          <span className={`w-2 h-2 rounded-full animate-bounce ${theme.dot}`}></span>
+
+        {/* Typing Bubble */}
+        <div 
+          className="
+            bg-white 
+            py-4 px-6 
+            rounded-2xl rounded-bl-md 
+            border border-slate-100 
+            shadow-sm
+          "
+        >
+          <div className="flex items-center gap-1.5">
+            <div 
+              className="typing-dot"
+              style={{ animationDelay: '0ms' }}
+            />
+            <div 
+              className="typing-dot"
+              style={{ animationDelay: '150ms' }}
+            />
+            <div 
+              className="typing-dot"
+              style={{ animationDelay: '300ms' }}
+            />
+          </div>
         </div>
       </div>
     </div>
