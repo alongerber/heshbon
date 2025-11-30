@@ -1,58 +1,51 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { TUTOR_SYSTEM_INSTRUCTION } from './types';
+import Anthropic from "@anthropic-ai/sdk";
+import { TUTOR_SYSTEM_INSTRUCTION } from "./types";
 
-let chatSession: any = null;
-let genAI: GoogleGenerativeAI | null = null;
+let client: Anthropic | null = null;
+let conversationHistory: { role: "user" | "assistant"; content: string }[] = [];
+let systemPrompt: string = TUTOR_SYSTEM_INSTRUCTION;
 
-const getAIClient = () => {
-  if (!genAI) {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+const getClient = () => {
+  if (!client) {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-        throw new Error("MISSING_API_KEY");
+      throw new Error("MISSING_API_KEY");
     }
-    genAI = new GoogleGenerativeAI(apiKey);
+    client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
   }
-  return genAI;
+  return client;
 };
 
-export const initializeChat = async (userName?: string, gender?: string): Promise<void> => {
-  try {
-    const client = getAIClient();
-    
-    let instruction = TUTOR_SYSTEM_INSTRUCTION;
-    if (userName) instruction += `\nSTUDENT NAME: ${userName}`;
-    if (gender) instruction += `\nGENDER: ${gender} (Use Hebrew ${gender === 'בן' ? 'Male' : 'Female'} grammar).`;
-
-// שימוש במודל gemini-2.5-pro - הכי חזק!
-    const model = client.getGenerativeModel({ 
-        model: "gemini-2.5-pro", 
-        systemInstruction: instruction 
-    });
-
-    chatSession = model.startChat({
-        history: [],
-        generationConfig: {
-            maxOutputTokens: 1000,
-            temperature: 0.7,
-        },
-    });
-
-  } catch (error) {
-      console.error("Chat init error:", error);
-  }
+export const initializeChat = async (
+  userName?: string,
+  gender?: string
+): Promise<void> => {
+  conversationHistory = [];
+  systemPrompt = TUTOR_SYSTEM_INSTRUCTION;
+  if (userName) systemPrompt += `\nSTUDENT NAME: ${userName}`;
+  if (gender)
+    systemPrompt += `\nGENDER: ${gender} (Use Hebrew ${gender === "בן" ? "Male" : "Female"} grammar).`;
 };
 
 export const sendMessageToGemini = async (message: string): Promise<string> => {
   try {
-    if (!chatSession) await initializeChat();
-    
-    if (!chatSession) return "שגיאה: לא מצליח להתחבר.";
+    const anthropic = getClient();
 
-    // שליחה פשוטה שעובדת תמיד
-    const result = await chatSession.sendMessage(message);
-    const response = await result.response;
-    return response.text();
+    conversationHistory.push({ role: "user", content: message });
 
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: conversationHistory,
+    });
+
+    const assistantMessage =
+      response.content[0].type === "text" ? response.content[0].text : "";
+
+    conversationHistory.push({ role: "assistant", content: assistantMessage });
+
+    return assistantMessage;
   } catch (error: any) {
     console.error("API Error:", error);
     return "אופס, הייתה לי בעיה קטנה. בוא ננסה שוב! 🔄";
@@ -60,6 +53,6 @@ export const sendMessageToGemini = async (message: string): Promise<string> => {
 };
 
 export const resetChat = () => {
-  chatSession = null;
-  genAI = null;
+  conversationHistory = [];
+  client = null;
 };
