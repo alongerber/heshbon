@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Chat } from "@google/genai";
-import { TUTOR_SYSTEM_INSTRUCTION } from '../types';
+import { TUTOR_SYSTEM_INSTRUCTION } from './types';
 
 let chatSession: Chat | null = null;
 let ai: GoogleGenAI | null = null;
