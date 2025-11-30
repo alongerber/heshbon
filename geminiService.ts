@@ -24,10 +24,10 @@ export const initializeChat = async (userName?: string, gender?: string): Promis
     if (gender) instruction += `\nGENDER: ${gender} (Use Hebrew ${gender === 'בן' ? 'Male' : 'Female'} grammar).`;
 
     // כאן הקסם: שימוש במודל ה-PRO החכם דרך הספרייה היציבה
-    const model = client.getGenerativeModel({ 
-        model: "gemini-1.5-pro", 
-        systemInstruction: instruction 
-    });
+const model = client.getGenerativeModel({ 
+    model: "gemini-2.0-flash", 
+    systemInstruction: instruction 
+});
 
     chatSession = model.startChat({
         history: [],
