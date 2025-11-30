@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Message, Sender, AppMode } from '../types';
+import { Message, Sender, AppMode } from './types';
 import { Bot, User, Brain, Dumbbell, Trophy } from 'lucide-react';
 
 interface ChatBubbleProps {
