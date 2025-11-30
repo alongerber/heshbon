@@ -23,11 +23,11 @@ export const initializeChat = async (userName?: string, gender?: string): Promis
     if (userName) instruction += `\nSTUDENT NAME: ${userName}`;
     if (gender) instruction += `\nGENDER: ${gender} (Use Hebrew ${gender === 'בן' ? 'Male' : 'Female'} grammar).`;
 
-    // כאן הקסם: שימוש במודל ה-PRO החכם דרך הספרייה היציבה
-const model = client.getGenerativeModel({ 
-    model: "gemini-2.0-flash", 
-    systemInstruction: instruction 
-});
+// שימוש במודל gemini-2.5-pro - הכי חזק!
+    const model = client.getGenerativeModel({ 
+        model: "gemini-2.5-pro", 
+        systemInstruction: instruction 
+    });
 
     chatSession = model.startChat({
         history: [],
