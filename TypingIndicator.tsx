@@ -1,6 +1,6 @@
 import React from 'react';
 import { Bot, Brain, Dumbbell, Trophy } from 'lucide-react';
-import { AppMode } from '../types';
+import { AppMode } from './types';
 
 interface TypingIndicatorProps {
   mode: AppMode;
