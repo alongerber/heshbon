@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Lightbulb, HelpCircle, Check, ArrowRight, User, GraduationCap, Play, PieChart, Shapes, Calculator, Binary, Menu, SkipForward } from 'lucide-react';
-import { AppMode } from '../types';
+import { AppMode } from './types';
 
 interface QuickActionsProps {
   mode: AppMode;
