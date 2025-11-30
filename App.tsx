@@ -1,13 +1,8 @@
-
-import React, { useState, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Message, Sender, AppMode } from './types';
-import ChatBubble from './components/ChatBubble';
-import ChatInput from './components/ChatInput';
-import TypingIndicator from './components/TypingIndicator';
-import QuickActions from './components/QuickActions';
-import { sendMessageToGemini, initializeChat, resetChat } from './services/geminiService';
-import { Calculator, RotateCcw, Brain, Dumbbell, Trophy } from 'lucide-react';
+import ChatBubble from './ChatBubble';
+import ChatInput from './ChatInput';
+import TypingIndicator from './TypingIndicator';
+import QuickActions from './QuickActions';
+import { sendMessageToGemini, initializeChat, resetChat } from './geminiService';
 
 // Flow steps: name -> gender -> menu -> topics -> chat
 type FlowStep = 'name' | 'gender' | 'menu' | 'topics' | 'chat';
