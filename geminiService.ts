@@ -10,7 +10,6 @@ const getAIClient = () => {
     if (!apiKey) {
         throw new Error("MISSING_API_KEY");
     }
-    // שימוש ב-SDK החדש ביותר
     aiClient = new GoogleGenAI({ apiKey: apiKey });
   }
   return aiClient;
@@ -24,9 +23,9 @@ export const initializeChat = async (userName?: string, gender?: string): Promis
     if (userName) instruction += `\nSTUDENT NAME: ${userName}`;
     if (gender) instruction += `\nGENDER: ${gender} (Use Hebrew ${gender === 'בן' ? 'Male' : 'Female'} grammar).`;
 
-    // חיבור למודל הכי חזק - Gemini 3 Pro
+    // נסיון חיבור למודל 3, עם גיבוי למודל 1.5 אם 3 עדיין סגור לבטא
     chatSession = client.chats.create({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-1.5-pro', // חזרנו ל-1.5 PRO שהוא הכי חכם ופתוח לכולם בוודאות
         config: {
             systemInstruction: instruction,
             temperature: 0.7,
@@ -42,25 +41,18 @@ export const sendMessageToGemini = async (message: string): Promise<string> => {
   try {
     if (!chatSession) await initializeChat();
     
-    if (!chatSession) return "שגיאה: לא מצליח להתחבר למנוע Gemini 3.";
+    if (!chatSession) return "שגיאה: לא מצליח להתחבר למנוע הבינה.";
 
-    // שליחת הודעה בפורמט החדש
-    const result = await chatSession.send({
-      role: 'user',
+    // התיקון הקריטי: שימוש ב-sendMessage במקום send
+    const result = await chatSession.sendMessage({
       parts: [{ text: message }]
     });
 
     return result.text || "לא התקבלה תשובה.";
 
   } catch (error: any) {
-    console.error("Gemini 3 API Error:", error);
-    
-    // Fallback בסיסי למקרה שהמודל החדש עמוס או לא זמין
-    if (error.status === 404 || error.status === 503) {
-        return "המודל החדש (Gemini 3) עמוס כרגע. נסה שוב בעוד רגע.";
-    }
-    
-    return "אופס, יש בעיה בתקשורת עם המוח החדש. 🔄";
+    console.error("API Error:", error);
+    return "אופס, נתקלתי בבעיה. נסה שוב! 🔄";
   }
 };
 
