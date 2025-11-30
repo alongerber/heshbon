@@ -1,19 +1,19 @@
 import { GoogleGenAI } from "@google/genai";
-import type { Chat } from "@google/genai";
 import { TUTOR_SYSTEM_INSTRUCTION } from './types';
 
-let chatSession: Chat | null = null;
-let ai: GoogleGenAI | null = null;
+let chatSession: any = null;
+let aiClient: GoogleGenAI | null = null;
 
 const getAIClient = () => {
-  if (!ai) {
+  if (!aiClient) {
     const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
     if (!apiKey) {
         throw new Error("MISSING_API_KEY");
     }
-    ai = new GoogleGenAI({ apiKey: apiKey });
+    // שימוש ב-SDK החדש ביותר
+    aiClient = new GoogleGenAI({ apiKey: apiKey });
   }
-  return ai;
+  return aiClient;
 };
 
 export const initializeChat = async (userName?: string, gender?: string): Promise<void> => {
@@ -24,8 +24,9 @@ export const initializeChat = async (userName?: string, gender?: string): Promis
     if (userName) instruction += `\nSTUDENT NAME: ${userName}`;
     if (gender) instruction += `\nGENDER: ${gender} (Use Hebrew ${gender === 'בן' ? 'Male' : 'Female'} grammar).`;
 
+    // חיבור למודל הכי חזק - Gemini 3 Pro
     chatSession = client.chats.create({
-        model: 'gemini-1.5-flash', // הכי יציב ומהיר
+        model: 'gemini-3-pro-preview',
         config: {
             systemInstruction: instruction,
             temperature: 0.7,
@@ -41,17 +42,29 @@ export const sendMessageToGemini = async (message: string): Promise<string> => {
   try {
     if (!chatSession) await initializeChat();
     
-    if (!chatSession) return "שגיאה: לא מצליח להתחבר.";
+    if (!chatSession) return "שגיאה: לא מצליח להתחבר למנוע Gemini 3.";
 
-    const result = await chatSession.sendMessage({ message });
-    return result.text || "לא הבנתי, נסה שוב.";
+    // שליחת הודעה בפורמט החדש
+    const result = await chatSession.send({
+      role: 'user',
+      parts: [{ text: message }]
+    });
+
+    return result.text || "לא התקבלה תשובה.";
 
   } catch (error: any) {
-    console.error("API Error:", error);
-    return "אופס, הייתה לי בעיה בתקשורת. בוא ננסה שוב! 🔄";
+    console.error("Gemini 3 API Error:", error);
+    
+    // Fallback בסיסי למקרה שהמודל החדש עמוס או לא זמין
+    if (error.status === 404 || error.status === 503) {
+        return "המודל החדש (Gemini 3) עמוס כרגע. נסה שוב בעוד רגע.";
+    }
+    
+    return "אופס, יש בעיה בתקשורת עם המוח החדש. 🔄";
   }
 };
 
 export const resetChat = () => {
   chatSession = null;
+  aiClient = null;
 };
